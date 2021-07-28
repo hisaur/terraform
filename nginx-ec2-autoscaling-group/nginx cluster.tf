@@ -1,50 +1,3 @@
-provider "aws" {
-    profile = "default"
-    region  = "us-east-1"
-}
-resource "aws_s3_bucket" "s3_bucket" {
-    bucket = "terraform-toktosunov-s3"
-    acl    = "private"
-    tags = {
-    "Creator" = "Terraform"
-  }
-}
-resource "aws_vpc" "new_vpc" {
-    cidr_block = "10.1.0.0/16"
-    tags = {
-    "Creator" = "Terraform"
-  }
-}
-resource "aws_default_route_table" "terraform" {
-  default_route_table_id = aws_vpc.new_vpc.default_route_table_id
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.terraform.id
-  }
-}
-
-resource "aws_internet_gateway" "terraform" {
-  vpc_id = aws_vpc.new_vpc.id
-  tags = {
-    "Creator" = "Terraform"
-  }
-}
-resource "aws_subnet" "new_vpc_subnet-1" {
-  vpc_id            = aws_vpc.new_vpc.id
-  cidr_block        = "10.1.1.0/24"
-  availability_zone = "us-east-1a"
-  tags = {
-    "Creator" = "Terraform"
-  }
-}
-resource "aws_subnet" "new_vpc_subnet-2" {
-  vpc_id            = aws_vpc.new_vpc.id
-  cidr_block        = "10.1.2.0/24"
-  availability_zone = "us-east-1b"
-  tags = {
-    "Creator" = "Terraform"
-  }
-}
 resource "aws_security_group" "web" {
     name        = "terraform_sg"
     description = "simple descrition"
@@ -106,8 +59,7 @@ resource "aws_autoscaling_group" "terraform" {
   launch_template {
     id = aws_launch_template.terraform.id
   }
-  
-  #target_group_arns = [ aws_lb_target_group.terraform_elb.arn]
+  target_group_arns = [ aws_lb_target_group.terraform_elb.arn]
 }
 resource "aws_launch_template" "terraform" {
   name_prefix            = "terraform-nginx"
@@ -118,19 +70,28 @@ resource "aws_launch_template" "terraform" {
     associate_public_ip_address = true
     security_groups = [ aws_security_group.web.id ]
   }
+  tags = {
+    "Creator" = "Terraform"
+  }
 }
-/*
+
 resource "aws_lb" "terraform_elb" {
   internal           = false
   subnets            = [ aws_subnet.new_vpc_subnet-1.id, aws_subnet.new_vpc_subnet-2.id ]
   ip_address_type    = "ipv4"
   load_balancer_type = "application"
+  tags = {
+    "Creator" = "Terraform"
+  }
 }
 resource "aws_lb_target_group" "terraform_elb" {
   target_type = "instance"
   port        = 80
   protocol    = "HTTP"
   vpc_id      = aws_vpc.new_vpc.id
+  tags = {
+    "Creator" = "Terraform"
+  }
 }
 resource "aws_lb_listener" "terraform_elb" {
   default_action {
@@ -140,5 +101,7 @@ resource "aws_lb_listener" "terraform_elb" {
   load_balancer_arn = aws_lb.terraform_elb.arn
   protocol          = "HTTP"
   port              = 80
+  tags = {
+    "Creator" = "Terraform"
+  }
 }
-*/
