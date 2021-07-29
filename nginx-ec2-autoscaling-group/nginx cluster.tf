@@ -66,6 +66,9 @@ resource "aws_launch_template" "terraform" {
   instance_type          = "t2.micro"
   image_id               = "ami-0ad235070aed081b7"
   key_name               = "default"
+  iam_instance_profile {
+    arn = aws_iam_instance_profile.terraform.arn
+  }
   network_interfaces {
     associate_public_ip_address = true
     security_groups = [ aws_security_group.web.id ]
