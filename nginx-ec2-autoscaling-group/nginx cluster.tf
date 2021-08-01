@@ -52,6 +52,26 @@ resource "aws_security_group" "web" {
   }
     
 }
+resource "aws_security_group" "http" {
+  name        = "terraform_sg_http_only"
+  vpc_id      = aws_vpc.new_vpc.id
+  ingress     = [ {
+      cidr_blocks      = [ "0.0.0.0/0" ]
+      description      = "value"
+      from_port        = 80
+      to_port          = 80
+      ipv6_cidr_blocks = []
+      prefix_list_ids  = []
+      protocol         = "tcp"
+      security_groups  = [ ]
+      self             = false
+    }
+  ]
+  tags = {
+    "Creator" = "Terraform"
+    "Environment" = var.env
+  }
+}
 resource "aws_autoscaling_group" "terraform" {
   name     = "nginx-autoscaling-group"
   max_size = 3
@@ -67,14 +87,7 @@ resource "aws_launch_template" "terraform" {
   instance_type          = "t2.micro"
   image_id               = "ami-0c2b8ca1dad447f8a"
   key_name               = "default"
-  user_data = <<EOF
-    !#/bin/bash
-    yum update
-    yum install -y nginx
-    systemctl enable --now nginx
-    aws s3 cp s3://${aws_s3_bucket_object.terraform-index.bucket}/${aws_s3_bucket_object.terraform-index.key} /usr/share/nginx/html
-    chmod  --recursive 744 /usr/share/nginx/html
-  EOF
+  user_data = filebase64("${path.module}/startup.sh")
   iam_instance_profile {
     arn = aws_iam_instance_profile.terraform.arn
   }
@@ -93,6 +106,7 @@ resource "aws_lb" "terraform_elb" {
   subnets            = [ aws_subnet.new_vpc_subnet-1.id, aws_subnet.new_vpc_subnet-2.id ]
   ip_address_type    = "ipv4"
   load_balancer_type = "application"
+  security_groups = [ aws_security_group.http.id ]
   tags = {
     "Creator" = "Terraform"
     "Environment" = var.env
