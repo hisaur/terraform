@@ -29,7 +29,8 @@ resource "aws_iam_policy" "terraform" {
     ]
 })
   tags = {
-    tag-key = "tag-value"
+    "Creator" = "Terraform"
+    "Environment" = var.env
   }
 }
 resource "aws_iam_policy_attachment" "terraform" {

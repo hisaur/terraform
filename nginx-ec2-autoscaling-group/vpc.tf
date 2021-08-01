@@ -2,10 +2,15 @@ provider "aws" {
     profile = "default"
     region  = "us-east-1"
 }
+variable "env" {
+  type = string
+  default = "prod"
+}
 resource "aws_vpc" "new_vpc" {
     cidr_block = "10.1.0.0/16"
     tags = {
     "Creator" = "Terraform"
+    "Environment" = var.env
   }
 }
 resource "aws_default_route_table" "terraform" {
@@ -20,6 +25,7 @@ resource "aws_internet_gateway" "terraform" {
   vpc_id = aws_vpc.new_vpc.id
   tags = {
     "Creator" = "Terraform"
+    "Environment" = var.env
   }
 }
 resource "aws_subnet" "new_vpc_subnet-1" {
@@ -28,6 +34,7 @@ resource "aws_subnet" "new_vpc_subnet-1" {
   availability_zone = "us-east-1a"
   tags = {
     "Creator" = "Terraform"
+    "Environment" = var.env
   }
 }
 resource "aws_subnet" "new_vpc_subnet-2" {
@@ -36,5 +43,6 @@ resource "aws_subnet" "new_vpc_subnet-2" {
   availability_zone = "us-east-1b"
   tags = {
     "Creator" = "Terraform"
+    "Environment" = var.env
   }
 }

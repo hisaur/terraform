@@ -48,6 +48,7 @@ resource "aws_security_group" "web" {
     } ]
     tags = {
     "Creator" = "Terraform"
+    "Environment" = var.env
   }
     
 }
@@ -64,8 +65,16 @@ resource "aws_autoscaling_group" "terraform" {
 resource "aws_launch_template" "terraform" {
   name_prefix            = "terraform-nginx"
   instance_type          = "t2.micro"
-  image_id               = "ami-0ad235070aed081b7"
+  image_id               = "ami-0c2b8ca1dad447f8a"
   key_name               = "default"
+  user_data = <<EOF
+    !#/bin/bash
+    yum update
+    yum install -y nginx
+    systemctl enable --now nginx
+    aws s3 cp s3://${aws_s3_bucket_object.terraform-index.bucket}/${aws_s3_bucket_object.terraform-index.key} /usr/share/nginx/html
+    chmod  --recursive 744 /usr/share/nginx/html
+  EOF
   iam_instance_profile {
     arn = aws_iam_instance_profile.terraform.arn
   }
@@ -75,6 +84,7 @@ resource "aws_launch_template" "terraform" {
   }
   tags = {
     "Creator" = "Terraform"
+    "Environment" = var.env
   }
 }
 
@@ -85,6 +95,7 @@ resource "aws_lb" "terraform_elb" {
   load_balancer_type = "application"
   tags = {
     "Creator" = "Terraform"
+    "Environment" = var.env
   }
 }
 resource "aws_lb_target_group" "terraform_elb" {
@@ -94,6 +105,7 @@ resource "aws_lb_target_group" "terraform_elb" {
   vpc_id      = aws_vpc.new_vpc.id
   tags = {
     "Creator" = "Terraform"
+    "Environment" = var.env
   }
 }
 resource "aws_lb_listener" "terraform_elb" {
@@ -106,5 +118,6 @@ resource "aws_lb_listener" "terraform_elb" {
   port              = 80
   tags = {
     "Creator" = "Terraform"
+    "Environment" = var.env
   }
 }

@@ -3,6 +3,7 @@ resource "aws_s3_bucket" "terraform" {
     acl    = "private"
     tags = {
     "Creator" = "Terraform"
+    "Environment" = var.env
   }
 }
 resource "aws_s3_bucket_object" "terraform-index" {
