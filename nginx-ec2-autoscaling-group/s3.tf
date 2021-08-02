@@ -1,7 +1,7 @@
 resource "aws_s3_bucket" "terraform" {
     bucket = "terraform-toktosunov-s3"
     acl    = "private"
-    tags = {
+    tags   = {
     "Creator" = "Terraform"
     "Environment" = var.env
   }
@@ -18,9 +18,9 @@ resource "aws_s3_bucket_object" "terraform-error" {
 }
 resource "local_file" "index_html" {
     content     = "<Html><title>Sample Nginx Web Page</title><b>Hello World</b><i>Hello World</i><u> Hello World</u></Html>"
-    filename = "${path.module}/index.html"
+    filename    = "${path.module}/index.html"
 }
 resource "local_file" "error_html" {
     content     = "<Html><title>Sample Nginx Error Page</title><b>Error</b><i>Error</i><u>Error</u></Html>"
-    filename = "${path.module}/error.html"
+    filename    = "${path.module}/error.html"
 }

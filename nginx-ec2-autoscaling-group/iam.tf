@@ -1,5 +1,5 @@
 resource "aws_iam_role" "terraform" {
-  name = "terraform-s3-read-only"
+  name               = "terraform-s3-read-only"
   assume_role_policy = jsonencode(
   {
  "Version": "2012-10-17",
@@ -16,7 +16,7 @@ resource "aws_iam_role" "terraform" {
 })
 }
 resource "aws_iam_policy" "terraform" {
-  name = "terraform-s3-read-only"
+  name   = "terraform-s3-read-only"
   policy = jsonencode(
   {
     "Version": "2012-10-17",
@@ -40,5 +40,5 @@ resource "aws_iam_policy_attachment" "terraform" {
 }
 resource "aws_iam_instance_profile" "terraform" {
   name  = "terraform-s3-read-only"
-  role = aws_iam_role.terraform.name
+  role  = aws_iam_role.terraform.name
 }

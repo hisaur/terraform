@@ -37,8 +37,8 @@ resource "aws_security_group" "web" {
     }]
     egress = [ {
       cidr_blocks = [ "0.0.0.0/0" ]
-      description = "Allow to everywhere"
-      from_port = 0
+      description      = "Allow to everywhere"
+      from_port        = 0
       ipv6_cidr_blocks = [  ]
       prefix_list_ids  = [  ]
       protocol         = "-1"
@@ -47,10 +47,9 @@ resource "aws_security_group" "web" {
       to_port          = 0
     } ]
     tags = {
-    "Creator" = "Terraform"
+    "Creator"     = "Terraform"
     "Environment" = var.env
   }
-    
 }
 
 resource "aws_security_group" "http" {
@@ -93,10 +92,11 @@ resource "aws_security_group" "http" {
     }
   ]
   tags = {
-    "Creator" = "Terraform"
+    "Creator"     = "Terraform"
     "Environment" = var.env
   }
 }
+
 resource "aws_autoscaling_group" "terraform" {
   name     = "nginx-autoscaling-group"
   max_size = 3
@@ -107,6 +107,7 @@ resource "aws_autoscaling_group" "terraform" {
   }
   target_group_arns = [ aws_lb_target_group.terraform_elb.arn]
 }
+
 resource "aws_launch_template" "terraform" {
   name_prefix            = "terraform-nginx"
   instance_type          = "t2.micro"
@@ -114,19 +115,19 @@ resource "aws_launch_template" "terraform" {
   image_id               = "ami-0c2b8ca1dad447f8a"
   key_name               = "default"
   user_data = base64encode(templatefile("${path.module}/startup.sh",{
-    bucket_name=aws_s3_bucket.terraform.bucket,
-    index_key=aws_s3_bucket_object.terraform-index.key,
-    error_key=aws_s3_bucket_object.terraform-error.key
+    bucket_name = aws_s3_bucket.terraform.bucket,
+    index_key   = aws_s3_bucket_object.terraform-index.key,
+    error_key   = aws_s3_bucket_object.terraform-error.key
     }))
   iam_instance_profile {
     arn = aws_iam_instance_profile.terraform.arn
   }
   network_interfaces {
     associate_public_ip_address = true
-    security_groups = [ aws_security_group.web.id ]
+    security_groups             = [ aws_security_group.web.id ]
   }
   tags = {
-    "Creator" = "Terraform"
+    "Creator"     = "Terraform"
     "Environment" = var.env
   }
 }
@@ -136,9 +137,9 @@ resource "aws_lb" "terraform_elb" {
   subnets            = [ aws_subnet.new_vpc_subnet-1.id, aws_subnet.new_vpc_subnet-2.id ]
   ip_address_type    = "ipv4"
   load_balancer_type = "application"
-  security_groups = [ aws_security_group.http.id ]
-  tags = {
-    "Creator" = "Terraform"
+  security_groups    = [ aws_security_group.http.id ]
+  tags               = {
+    "Creator"     = "Terraform"
     "Environment" = var.env
   }
 }
@@ -147,8 +148,8 @@ resource "aws_lb_target_group" "terraform_elb" {
   port        = 80
   protocol    = "HTTP"
   vpc_id      = aws_vpc.new_vpc.id
-  tags = {
-    "Creator" = "Terraform"
+  tags        = {
+    "Creator"     = "Terraform"
     "Environment" = var.env
   }
 }
@@ -157,11 +158,11 @@ resource "aws_lb_listener" "terraform_elb" {
     type             = "forward"
     target_group_arn = aws_lb_target_group.terraform_elb.arn
   }
-  load_balancer_arn = aws_lb.terraform_elb.arn
-  protocol          = "HTTP"
-  port              = 80
-  tags = {
-    "Creator" = "Terraform"
+  load_balancer_arn  = aws_lb.terraform_elb.arn
+  protocol           = "HTTP"
+  port               = 80
+  tags               = {
+    "Creator"     = "Terraform"
     "Environment" = var.env
   }
 }
