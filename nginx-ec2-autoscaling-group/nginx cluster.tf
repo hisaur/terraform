@@ -1,32 +1,32 @@
 resource "aws_security_group" "web" {
     name        = "terraform_sg"
-    description = "simple descrition"
+    description = "SG for EC2 with HTTP,HTTPS and SSH"
     vpc_id      = aws_vpc.new_vpc.id
     ingress     = [ {
-      cidr_blocks      = [ "0.0.0.0/0" ]
-      description      = "value"
+      cidr_blocks      = []
+      description      = "HTTPS Traffic from ELB"
       from_port        = 443
       ipv6_cidr_blocks = []
       prefix_list_ids  = []
       protocol         = "tcp"
-      security_groups  = [ ]
+      security_groups  = [aws_security_group.http.id  ]
       self             = false
       to_port          = 443
     },
     {
-      cidr_blocks      = [ "0.0.0.0/0" ]
-      description      = "value"
+      cidr_blocks      = []
+      description      = "HTTP Traffic from ELB"
       from_port        = 80
       ipv6_cidr_blocks = []
       prefix_list_ids  = []
       protocol         = "tcp"
-      security_groups  = [ ]
+      security_groups  = [aws_security_group.http.id ]
       self             = false
       to_port          = 80
     },
     {
       cidr_blocks      = [ "0.0.0.0/0" ]
-      description      = "value"
+      description      = "SSH for management"
       from_port        = 22
       ipv6_cidr_blocks = []
       prefix_list_ids  = []
@@ -37,7 +37,7 @@ resource "aws_security_group" "web" {
     }]
     egress = [ {
       cidr_blocks = [ "0.0.0.0/0" ]
-      description = "value"
+      description = "Allow to everywhere"
       from_port = 0
       ipv6_cidr_blocks = [  ]
       prefix_list_ids  = [  ]
@@ -52,19 +52,44 @@ resource "aws_security_group" "web" {
   }
     
 }
+
 resource "aws_security_group" "http" {
   name        = "terraform_sg_http_only"
   vpc_id      = aws_vpc.new_vpc.id
   ingress     = [ {
       cidr_blocks      = [ "0.0.0.0/0" ]
-      description      = "value"
+      description      = "HTTP Traffic"
       from_port        = 80
       to_port          = 80
       ipv6_cidr_blocks = []
       prefix_list_ids  = []
       protocol         = "tcp"
       security_groups  = [ ]
-      self             = false
+      self             = true
+    },
+    {
+      cidr_blocks      = [ "0.0.0.0/0" ]
+      description      = "HTTPS Traffic"
+      from_port        = 443
+      to_port          = 443
+      ipv6_cidr_blocks = []
+      prefix_list_ids  = []
+      protocol         = "tcp"
+      security_groups  = [ ]
+      self             = true
+    },
+  ]
+  egress = [
+    {
+      cidr_blocks      = [ "0.0.0.0/0" ]
+      description      = "Traffic to EC2"
+      from_port        = 80
+      to_port          = 80
+      ipv6_cidr_blocks = []
+      prefix_list_ids  = []
+      protocol         = "tcp"
+      security_groups  = []
+      self             = true
     }
   ]
   tags = {
@@ -85,9 +110,14 @@ resource "aws_autoscaling_group" "terraform" {
 resource "aws_launch_template" "terraform" {
   name_prefix            = "terraform-nginx"
   instance_type          = "t2.micro"
+  #AMI is Amazon Linux2
   image_id               = "ami-0c2b8ca1dad447f8a"
   key_name               = "default"
-  user_data = filebase64("${path.module}/startup.sh")
+  user_data = base64encode(templatefile("${path.module}/startup.sh",{
+    bucket_name=aws_s3_bucket.terraform.bucket,
+    index_key=aws_s3_bucket_object.terraform-index.key,
+    error_key=aws_s3_bucket_object.terraform-error.key
+    }))
   iam_instance_profile {
     arn = aws_iam_instance_profile.terraform.arn
   }
