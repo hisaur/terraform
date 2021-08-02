@@ -6,6 +6,23 @@ variable "env" {
   type    = string
   default = "prod"
 }
+variable "ami-id" {
+  type = string
+  #AMI is Amazon Linux 2
+  default = "ami-0c2b8ca1dad447f8a"
+}
+variable "instance-type" {
+  type = string
+  default = "t2.micro"
+}
+variable "autoscaling-group-min-size" {
+  type = number
+  default = 2
+}
+variable "autoscaling-group-max-size" {
+  type = number
+  default = 3
+}
 resource "aws_vpc" "new_vpc" {
     cidr_block = "10.1.0.0/16"
     tags       = {

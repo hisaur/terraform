@@ -107,12 +107,23 @@ resource "aws_autoscaling_group" "terraform" {
   }
   target_group_arns = [ aws_lb_target_group.terraform_elb.arn]
 }
-
+resource "aws_autoscaling_policy" "terraform" {
+  name = "Terraform-nginx-autoscaling-policy"
+  adjustment_type = "ChangeInCapacity"
+  autoscaling_group_name = aws_autoscaling_group.terraform.name
+  policy_type = "TargetTrackingScaling"
+  target_tracking_configuration {
+    predefined_metric_specification {
+      predefined_metric_type = "ASGAverageCPUUtilization"
+    }
+  target_value = 80
+  }
+}
 resource "aws_launch_template" "terraform" {
   name_prefix            = "terraform-nginx"
-  instance_type          = "t2.micro"
+  instance_type          = var.instance-type
   #AMI is Amazon Linux2
-  image_id               = "ami-0c2b8ca1dad447f8a"
+  image_id               = var.ami-id
   key_name               = "default"
   user_data = base64encode(templatefile("${path.module}/startup.sh",{
     bucket_name = aws_s3_bucket.terraform.bucket,
