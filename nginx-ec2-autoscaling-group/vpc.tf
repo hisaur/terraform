@@ -1,6 +1,6 @@
 provider "aws" {
-    profile = "default"
-    region  = "us-east-1"
+  profile = "default"
+  region  = "us-east-1"
 }
 variable "env" {
   type    = string
@@ -12,20 +12,20 @@ variable "ami-id" {
   default = "ami-0c2b8ca1dad447f8a"
 }
 variable "instance-type" {
-  type = string
+  type    = string
   default = "t2.micro"
 }
 variable "autoscaling-group-min-size" {
-  type = number
+  type    = number
   default = 2
 }
 variable "autoscaling-group-max-size" {
-  type = number
+  type    = number
   default = 3
 }
 resource "aws_vpc" "new_vpc" {
-    cidr_block = "10.1.0.0/16"
-    tags       = {
+  cidr_block = "10.1.0.0/16"
+  tags = {
     "Creator"     = "Terraform"
     "Environment" = var.env
   }
@@ -40,7 +40,7 @@ resource "aws_default_route_table" "terraform" {
 
 resource "aws_internet_gateway" "terraform" {
   vpc_id = aws_vpc.new_vpc.id
-  tags   = {
+  tags = {
     "Creator"     = "Terraform"
     "Environment" = var.env
   }
