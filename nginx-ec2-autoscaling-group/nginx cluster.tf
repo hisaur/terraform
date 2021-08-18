@@ -177,3 +177,7 @@ resource "aws_lb_listener" "terraform_elb" {
     "Environment" = var.env
   }
 }
+output "DNS" {
+  description = "DNS name of the Load Balancer"
+  value = aws_lb.terraform_elb.dns_name
+}
