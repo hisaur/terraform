@@ -38,3 +38,4 @@ resource "aws_iam_instance_profile" "terraform" {
   name = "terraform-s3-read-only"
   role = aws_iam_role.terraform.name
 }
+!!!

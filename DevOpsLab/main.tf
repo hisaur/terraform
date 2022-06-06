@@ -12,7 +12,7 @@ resource "aws_instance" "bastion" {
     key_name = "devOpsLab"
     user_data_base64 = "IyEvYmluL2Jhc2gKcHl0aG9uMyAtbSBwaXAgaW5zdGFsbCBib3RvMwpzdWRvIHRvdWNoIC9ob21lL2VjMi11c2VyLzE="
 }
-
+111
 resource "aws_security_group" "ssh" {
   name   = "terraform_sg_ssh_only"
   ingress = [{
